@@ -1,4 +1,4 @@
-#!/bin/bash 
+#!/usr/bin/env bash 
 #===============================================================================
 #
 #          FILE:  apt-sn.sh
@@ -20,10 +20,6 @@
 #===============================================================================
 
 # Parametry startowe
-if ! which apt-cache &>/dev/null; then
-	echo "apt-cache not found. Is it Debian?" 1>&2
-	exit 1
-fi
 if ! type readarray &>/dev/null; then
 	echo "This script requirements bash>4 with readarray built-in function" 1>&2
 	exit 1
@@ -78,10 +74,10 @@ aptcache(){ #{{{
 	}'
 	fi
 }	# eof aptcache }}}
-search(){  #{{{
+_search(){  #{{{
 # return: global var PKGSFOUND
 	{ readarray -t PKGSFOUND < <(aptcache --get-res 3>&1 1>&2 ); } 2>&1
-}	# eof search }}}
+}	# eof _search }}}
 _showmsg(){ #{{{
 # $1 kolor, wiadomość
 	echo -en "$1==> ${colorname}$2${coloroff}"
@@ -116,7 +112,11 @@ while getopts $OPTIONS OPT; do
 		;;
 	esac
 done
-search 
+if ! which apt-cache &>/dev/null; then
+	echo "apt-cache not found. Is it Debian?" 1>&2
+	exit 1
+fi
+_search 
 [[ $PKGSFOUND ]] || exit 0
 _showmsg $colorprompt "Enter n° of packages to be installed (ex: 1 2 3 or 1-3)\n"
 _showmsg $colorprompt "-------------------------------------------------------\n"
